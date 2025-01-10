@@ -360,6 +360,23 @@ services:
       postgres-archive:
         condition: service_healthy
 
+  autoclosedaemon:
+    image: ghcr.io/ticketsbot/autoclosedaemon:68cb9a641e9536dd45378d9fe0a085902f99914c
+    environment:
+      DATABASE_URI: postgres://postgres:ticketsbotpass@postgres:5432/ticketsbot
+      DATABASE_THREADS: 4
+      CACHE_URI: postgres://postgres:password@postgres-cache/botcache
+      CACHE_THREADS: 4
+      REDIS_ADDR: redis:6379
+      REDIS_PASSWORD: yourpassword
+      REDIS_THREADS: 4
+      SENTRY_DSN: ${SENTRY_DSN}
+      SWEEP_TIME: 5 # in minutes
+      BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      PRODUCTION_MODE: true
+    networks:
+      - app-network
+
 
 networks:
   app-network:
