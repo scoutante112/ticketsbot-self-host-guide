@@ -11,7 +11,7 @@ This is a guide to self host the [Tickets bot](https://discord.com/users/5083918
 
 ## How does the bot work?
 
-To be completely honest, I still don't know. The image below is a rough diagram of how I think the bot works after nearly a week of tinkering with the TicketsBot codebase.
+To be completely honest, I still don't know. The image below is a rough diagram of how I think the bot works after nearly a week of tinkering with the TicketsBot codebase. The dotted boxes are the containers that I did not implement into the `docker-compose.yaml` in this repository.
 
 ![Excalidraw](./images/ticketsbot-2025-01-10T08_15_41_704Z.svg)
 
