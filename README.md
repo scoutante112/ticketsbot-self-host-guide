@@ -13,7 +13,7 @@ This is a guide to self host the [Tickets bot](https://discord.com/users/5083918
 
 To be completely honest, I still don't know. The image below is a rough diagram of how I think the bot works after nearly a week of tinkering with the TicketsBot codebase.
 
-![Excalidraw](./ticketsbot-2025-01-10T08_15_41_704Z.svg)
+![Excalidraw](./images/ticketsbot-2025-01-10T08_15_41_704Z.svg)
 
 ## Setup (Simple)
 
