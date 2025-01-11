@@ -142,3 +142,8 @@ As this bot is self-hosted, you will need to configure the bot yourself. Here ar
     - The docker compose uses a specific hash for the bot's containers, so you will have to manually find the new hash and update the `docker-compose.yaml` file.
 5. How do I get rid of the `ticketsbot.net` branding?
     - If you have knowledge of how to compile GoLang, Rust, and Svelte, you can change the branding in the bot's [source code](https://github.com/TicketsBot) and recompile the bot and update those container hashes in `docker-compose.yaml` file and then re-run the bot.
+6. I want anyone to be able to use the dashboard, how do I do that?
+    - You gotta setup a reverse proxy (examples being; [NginX](https://nginx.org/), [Caddy](https://caddyserver.com/), [Traefik](https://traefik.io/traefik/)) with the following routes (assuming you are using the default ports from the compose file):
+        - `dashboard.example.com` -> `http://localhost:8082` (api container)
+        - `api.example.com` -> `http://localhost:5000` (dashboard container)
+        - `gateway.example.com` -> `http://localhost:8080` (http-gateway container)
