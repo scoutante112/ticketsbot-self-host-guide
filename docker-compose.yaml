@@ -141,7 +141,7 @@ services:
       WORKER_STATSD_ADDR: statsd:8125
       WORKER_STATSD_PREFIX: ticketsbot
 
-      WORKER_SENTRY_DSN: https://247fcd7e012b444d0634fc501835333e@o4508605735305216.ingest.us.sentry.io/4508605757194240
+      WORKER_SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
       postgres:
         condition: service_healthy
