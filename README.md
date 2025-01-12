@@ -19,7 +19,7 @@ The image above was made using [Excalidraw](https://excalidraw.com/).
 ## Setup (Simple)
 
 1. Open a terminal in the folder you want to install the bot in. (Or create a folder and open a terminal in that folder)
-2. Clone this repository into that folder (`git clone https://github.com/DanPlayz0/ticketsbot-self-host-guide.git .`) 
+2. Clone this repository into that folder (`git clone https://github.com/DanPlayz0/ticketsbot-self-host-guide.git .`)
     - The `.` at the end is important as it clones the repository into the current folder)
 3. Replace the placeholders in the `docker-compose.yaml` file. (The e.g. values are examples, do not use them)
     - Replace `${DISCORD_BOT_TOKEN}` with your bot token (e.g. `OTAyMzYyNTAxMDg4NDM2MjI0.YXdUkQ.TqZm7gNV2juZHXIvLdSvaAHKQCzLxgu9`)
@@ -37,13 +37,15 @@ The image above was made using [Excalidraw](https://excalidraw.com/).
     - Replace `${S3_ENDPOINT}` with the endpoint of your S3 bucket (e.g. `minio:9000`, no `https://`)
     - Replace `${S3_ACCESS}` with the access key of your S3 bucket (e.g. `AbCdEfFgHiJkLmNoPqRsTuVwXyZ`)
     - Replace `${S3_SECRET}` with the secret key of your S3 bucket (e.g. `AbCdEfFgHiJkLmNoPqRsTuVwXyZ`)
-    - Replace `${ARCHIVER_AES_KEY}` with a AES-128 key (aka 16 bytes), you can generate one one of the following commands: 
+    - Replace `${ARCHIVER_AES_KEY}` with a AES-128 key (aka 16 bytes), you can generate one one of the following commands:
         - Bash: `openssl rand -hex 16`
         - NodeJS: `node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"`
 4. Replace the placeholders in the following command and paste it at the bottom of `init-archive.sql`. There are 2 placeholders in the command, `${BUCKET_NAME}` and `${S3_ENDPOINT}`. Replace them with your bucket name and S3 endpoint respectively. You can also just edit the `init-archive.sql` file too, you just have to uncomment it (by removing the `--` at the start of the line) and replace variables there.
+
     ```sql
     INSERT INTO buckets (id, endpoint_url, name, active) VALUES ('b77cc1a0-91ec-4d64-bb6d-21717737ea3c', 'https://${S3_ENDPOINT}', '${BUCKET_NAME}', TRUE);
     ```
+
 5. Run `docker compose up -d` to pull the images and start the bot.
 6. Configure the Discord bot. ([see below](#discord-bot-configuration))
 7. Register the slash commands ([see below](#registering-the-slash-commands-using-docker-recommended))
@@ -64,6 +66,7 @@ As this bot is self-hosted, you will need to configure the bot yourself. Here ar
 ## Registering the slash commands using Docker (Recommended)
 
 1. Create the `commands.Dockerfile` and copy the following code block (this registers the commands with the bot)
+
     ```dockerfile
     # Build container
     FROM golang:1.22 AS builder
@@ -104,9 +107,10 @@ As this bot is self-hosted, you will need to configure the bot yourself. Here ar
 
     ENTRYPOINT ["/srv/worker/main"]
     ```
+
 2. Build the register commands cli utility using `docker build -t ticketsbot/registercommands -f commands.Dockerfile .`
 3. Get help by running `docker run --rm ticketsbot/registercommands --help`
-4. Register the commands 
+4. Register the commands
     - Global commands only: `docker run --rm ticketsbot/registercommands --token=your_bot_token --id=your_client_id`
     - Global & Admin commands by running `docker run --rm ticketsbot/registercommands --token=your_bot_token --id=your_client_id --admin-guild=your_admin_guild_id`
 
@@ -134,15 +138,19 @@ As this bot is self-hosted, you will need to configure the bot yourself. Here ar
         - After using the bot for a while, the bot was using around 1.5GB of RAM and 18% of a CPU.
 
 3. Can I turn off the logging?
-    - Kinda of, in certain containers there are environment variables such as the following which you can remove: 
+    - Kinda of, in certain containers there are environment variables such as the following which you can remove:
+
       ```yaml
       RUST_BACKTRACE: 1
       RUST_LOG: trace
       ```
+
 4. How do I update the bot?
     - The docker compose uses a specific hash for the bot's containers, so you will have to manually find the new hash and update the `docker-compose.yaml` file.
+
 5. How do I get rid of the `ticketsbot.net` branding?
     - If you have knowledge of how to compile GoLang, Rust, and Svelte, you can change the branding in the bot's [source code](https://github.com/TicketsBot) and recompile the bot and update those container hashes in `docker-compose.yaml` file and then re-run the bot.
+
 6. I want anyone to be able to use the dashboard, how do I do that?
     - You gotta setup a reverse proxy (examples being; [NginX](https://nginx.org/), [Caddy](https://caddyserver.com/), [Traefik](https://traefik.io/traefik/)) with the following routes (assuming you are using the default ports from the compose file):
         - `api.example.com` -> `http://localhost:8082` (api container)
