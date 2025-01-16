@@ -21,7 +21,7 @@ The image above was made using [Excalidraw](https://excalidraw.com/).
 1. Open a terminal in the folder you want to install the bot in. (Or create a folder and open a terminal in that folder)
 2. Clone this repository into that folder (`git clone https://github.com/DanPlayz0/ticketsbot-self-host-guide.git .`)
    - The `.` at the end is important as it clones the repository into the current folder
-3. Create an `.env` file by copying the provided `.env-example` file.
+3. Create an `.env` file by copying the provided `.env.example` file.
 
    - `DISCORD_BOT_TOKEN`: your bot token (e.g. `OTAyMzYyNTAxMDg4NDM2MjI0.YXdUkQ.TqZm7gNV2juZHXIvLdSvaAHKQCzLxgu9`)
    - `DISCORD_BOT_CLIENT_ID`: your bot's client ID (e.g. `508391840525975553`)
