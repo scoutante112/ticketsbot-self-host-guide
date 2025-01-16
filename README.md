@@ -67,8 +67,8 @@ As this bot is self-hosted, you will need to configure the bot yourself. Here ar
    - Replace `${HTTP_GATEWAY}` with the URL of your HTTP Gateway (e.g. `http://localhost:8080`, you must have a publicly accessible URL not localhost)
    - Replace `${DISCORD_BOT_CLIENT_ID}` with your bot's application/client ID (e.g. `508391840525975553`)
 4. Go to the OAuth2 tab
-5. Add the redirect URL `${API_URL}/callback` to the OAuth2 redirect URIs
-   - Replace `${API_URL}` with the URL of your API (e.g. `http://localhost:8080`, make sure this matches what you set in the [Setup](#setup-simple) section)
+5. Add the redirect URL `${DASHBOARD_URL}/callback` to the OAuth2 redirect URIs
+   - Replace `${DASHBOARD_URL}` with the URL of your API (e.g. `http://localhost:8080`, make sure this matches what you set in the [Setup](#setup-simple) section)
 
 ## Registering the slash commands using Docker (Recommended)
 
@@ -149,7 +149,7 @@ As this bot is self-hosted, you will need to configure the bot yourself. Here ar
 
 3. Can I turn off the logging?
 
-   - Kinda of, in certain containers there are environment variables such as the following which you can remove:
+   - Kinda of, in certain containers there are environment variables, like the ones below which you can remove:
 
      ```yaml
      RUST_BACKTRACE: 1
