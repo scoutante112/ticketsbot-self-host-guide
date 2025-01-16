@@ -296,7 +296,7 @@ services:
       SERVER_ADDR: 0.0.0.0:8081
       BASE_URL: ${DASHBOARD_URL}
       MAIN_SITE: ${LANDING_PAGE_URL} # Home/Landing (used for /premium)
-      DATABASE_URI: 'postgres://postgres:ticketsbotpass@postgres/ticketsbot'
+      DATABASE_URI: 'postgres://postgres:${DATABASE_PASSWORD:-null}@postgres/ticketsbot'
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
       REDIS_PORT: ${REDIS_PORT:-6379}
@@ -311,7 +311,7 @@ services:
       OAUTH_REDIRECT_URI: '${DASHBOARD_URL}/callback'
       BOT_ID: ${DISCORD_BOT_CLIENT_ID}
       BOT_TOKEN: '${DISCORD_BOT_TOKEN}'
-      CACHE_URI: postgres://postgres:${CACHE_DATABASE_PASSWORD:-null}@}postgres-cache/botcache
+      CACHE_URI: postgres://postgres:${CACHE_DATABASE_PASSWORD:-null}@postgres-cache/botcache
       # Optional?
       DISCORD_PROXY_URL: http-proxy:80
       METRIC_SERVER_ADDR: 0.0.0.0:8091
