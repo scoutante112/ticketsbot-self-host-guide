@@ -362,7 +362,7 @@ services:
   autoclosedaemon:
     image: ${AUTOCLOSEDAEMOON_IMAGE:-ghcr.io/ticketsbot/autoclosedaemon:68cb9a641e9536dd45378d9fe0a085902f99914c}
     environment:
-      DATABASE_URI: postgres://postgres:ticketsbotpass@${DATABASE_HOST:-postgres:5432}/ticketsbot
+      DATABASE_URI: postgres://postgres:${DATABASE_PASSWORD:-null}@${DATABASE_HOST:-postgres:5432}/ticketsbot
       DATABASE_THREADS: 4
       CACHE_URI: postgres://postgres:${CACHE_DATABASE_PASSWORD:-null}@postgres-cache/botcache
       CACHE_THREADS: 4
