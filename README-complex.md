@@ -1,4 +1,8 @@
-# Setup (Complex)
+# Self Hosting Tickets Bot (Complex)
+
+This is guide is not complete. I recommend looking at the simple/original documentation. **I will NOT provide support.**
+
+## Setup
 
 1. Create a folder somewhere (it will be where the bot will be installed), and open a terminal in that folder.
 2. Download the `schema.sql` (postgres dump file) from [#self-hosting](https://discord.com/channels/508392876359680000/1325513300892581898) channel in the [Tickets Support Discord server](https://discord.gg/NHz6G3qv55).
