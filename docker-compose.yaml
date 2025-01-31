@@ -82,7 +82,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD:-null} ping | grep PONG"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -296,8 +296,8 @@ services:
       - '8082:8081'
     environment:
       SERVER_ADDR: 0.0.0.0:8081
-      BASE_URL: ${DASHBOARD_URL}
-      MAIN_SITE: ${LANDING_PAGE_URL} # Home/Landing (used for /premium)
+      BASE_URL: ${DASHBOARD_URL:-http://localhost:5000}
+      MAIN_SITE: ${LANDING_PAGE_URL:-https://ticketsbot.net} # Home/Landing (used for /premium)
       DATABASE_URI: 'postgres://postgres:${DATABASE_PASSWORD:-null}@postgres/ticketsbot'
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
@@ -310,7 +310,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       OAUTH_ID: ${DISCORD_BOT_CLIENT_ID}
       OAUTH_SECRET: '${DISCORD_BOT_OAUTH_SECRET}'
-      OAUTH_REDIRECT_URI: '${DASHBOARD_URL}/callback'
+      OAUTH_REDIRECT_URI: '${DASHBOARD_URL:-http://localhost:5000}/callback'
       BOT_ID: ${DISCORD_BOT_CLIENT_ID}
       BOT_TOKEN: '${DISCORD_BOT_TOKEN}'
       CACHE_URI: postgres://postgres:${CACHE_DATABASE_PASSWORD:-null}@postgres-cache/botcache
@@ -337,9 +337,9 @@ services:
       dockerfile: './dashboard.Dockerfile'
       args:
         CLIENT_ID: ${DISCORD_BOT_CLIENT_ID}
-        REDIRECT_URI: ${DASHBOARD_URL}/callback 
-        API_URL: ${API_URL}
-        WS_URL: ${API_URL}
+        REDIRECT_URI: ${DASHBOARD_URL:-http://localhost:5000}/callback 
+        API_URL: ${API_URL:-http://localhost:8082}
+        WS_URL: ${API_URL:-http://localhost:8082}
     ports:
       - '5000:5000'
 
