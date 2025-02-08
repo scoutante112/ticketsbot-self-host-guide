@@ -389,6 +389,9 @@ services:
       PRODUCTION_MODE: true
     networks:
       - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   discord-chat-replica:
     image: ${DISCORD_CHAT_REPLICA_IMAGE:-ghcr.io/ticketsbot/discord-chat-replica:e7a42bfeb763b08d859f8a17430f5a38eb5d69a9}
