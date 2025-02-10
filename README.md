@@ -165,7 +165,7 @@ If you'd prefer to use a different UUID, you can generate one using [this websit
 To activate premium features, you will need to run the following SQL command in the `postgres` database:
 
 ```sql
-INSERT INTO skus (id, label, type) VALUES ('a924e567-bc50-4bf9-bd8f-9fb6bf91f374', 'Premium Monthly', 'subscription', true);
+INSERT INTO skus (id, label, type) VALUES ('a924e567-bc50-4bf9-bd8f-9fb6bf91f374', 'Premium Monthly', 'subscription');
 INSERT INTO subscription_skus (sku_id, tier, priority) VALUES ('a924e567-bc50-4bf9-bd8f-9fb6bf91f374', 'premium', 0);
 ```
 
