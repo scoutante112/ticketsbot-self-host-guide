@@ -223,3 +223,7 @@ ALTER TABLE members ADD COLUMN last_seen TIMESTAMPTZ;
 ```
 
 As this is just a cache database, you may also choose to stop the bot, delete the `pgcachedata` folder and re-run the bot with the updated `init-cache.sql` file.
+
+### 4. I can't login to the dashboard. Every time I try to login, it loops/redirects me back to the login page
+
+This issue is caused by the bot not being able to find any servers that you own or have admin for. You must first invite the bot into a server and run `/setup auto` in that server. Once you've done that, you should be able to login to the dashboard.
