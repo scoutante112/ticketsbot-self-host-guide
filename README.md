@@ -233,9 +233,14 @@ The most common error is that the URL you inputted is not publicly accessible (a
 
 ### 3. Invalid OAuth2 redirect_uri
 
-> :warning: If you set up a reverse proxy, you should use the dashboard domain you set instead of `localhost`.
+> :warning: If you set up a [reverse proxy](#6-i-want-anyone-to-be-able-to-use-the-dashboard-how-do-i-do-that), you should use the dashboard domain (e.g. `https://dashboard.example.com`) you set instead of `http://localhost:5000`.
 
 This error is caused by you not setting the OAuth2 redirect URI in the [Discord Bot Configuration](#discord-bot-configuration) section. You need to set the redirect URI to `${DASHBOARD_URL}/callback`. Replace `${DASHBOARD_URL}` with the URL of your dashboard (e.g. `http://localhost:5000`).
+
+If have already started the bot once and you've changed the `DASHBOARD_URL` in the `.env` file, you will need to delete the `dashboard` image. The "easy way" is to turn off the bot and delete all the images which were pulled or built by the compose file, you can do this by running `docker-compose down --rmi all`.
+
+The hard way is to find the image name, use `docker image ls` to view a list of images, and then use `docker image rm -f {image_name}`, replacing `{image_name}` with the image name.
+Assuming you cloned the repository into a folder named `ticketsbot-self-host-guide`, the image name would be `ticketsbot-self-host-guide_dashboard`.
 
 ### 4. ERROR: column "last_seen" of relation does not exist
 
