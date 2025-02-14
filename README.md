@@ -162,7 +162,7 @@ The following steps will allow you to activate premium features on your self-hos
 
 If you'd prefer to use a different UUID, you can generate one using [this website](https://www.uuidgenerator.net/version4). Just make sure to replace the UUID in each of the following steps.
 
-To activate premium features, you will need to run the following SQL command in the `postgres` database:
+To activate premium features, you will need to [run the following SQL command](#9-how-do-i-run-the-sql-commands-inside-the-database-containers) in the `postgres` database:
 
 ```sql
 INSERT INTO skus (id, label, type) VALUES ('a924e567-bc50-4bf9-bd8f-9fb6bf91f374', 'Premium Monthly', 'subscription');
