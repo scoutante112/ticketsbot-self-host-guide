@@ -185,6 +185,32 @@ It will ask you to `Select which method you used to obtain premium` and then you
 
 Click `Submit` and you should have premium activated on that server for *__length__* (provided above, as 99999) days
 
+### 9. How do I run the sql commands inside the database containers?
+
+There are a few ways to run SQL commands inside a database.
+
+The first way is to use a GUI tool like [pgAdmin](https://www.pgadmin.org/) or [HeidiSQL](https://www.heidisql.com/). You can connect to the database using the credentials in the `.env` file and run the SQL commands. (Note: This requires you to uncomment the `ports` section in the `postgres` service in the `docker-compose.yaml` file)
+
+The second way is to use the `psql` command line tool. You can run the following command to execute the SQL commands, replacing `{SQL_COMMAND}` with the SQL command you want to run.
+
+For the `postgres` "main" database:
+
+```bash
+docker compose exec postgres psql -U postgres -d ticketsbot {SQL_COMMAND}
+```
+
+For the `pgarchivedata` "archive" database:
+
+```bash
+docker compose exec postgres-archive psql -U postgres -d archive {SQL_COMMAND}
+```
+
+For the `pgcachedata` "cache" database:
+
+```bash
+docker compose exec postgres-cache psql -U postgres -d botcache {SQL_COMMAND}
+```
+
 ## Common Issues
 
 ### 1. There's an error. (`no active bucket`)
