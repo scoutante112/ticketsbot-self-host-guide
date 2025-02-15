@@ -191,24 +191,26 @@ There are a few ways to run SQL commands inside a database.
 
 The first way is to use a GUI tool like [pgAdmin](https://www.pgadmin.org/) or [HeidiSQL](https://www.heidisql.com/). You can connect to the database using the credentials in the `.env` file and run the SQL commands. (Note: This requires you to uncomment the `ports` section in the `postgres` service in the `docker-compose.yaml` file)
 
-The second way is to use the `psql` command line tool. You can run the following command to execute the SQL commands, replacing `{SQL_COMMAND}` with the SQL command you want to run.
+The second way is to use the `psql` command line tool. You can run the following command to execute the SQL commands, replacing `SQL_COMMAND` with the SQL command you want to run.
+
+If you prefer an interactive shell where you can paste multiple commands you can omit the `-c "SQL_COMMAND"` part.
 
 For the `postgres` "main" database:
 
 ```bash
-docker compose exec postgres psql -U postgres -d ticketsbot {SQL_COMMAND}
+docker compose exec postgres psql -U postgres -d ticketsbot -c "SQL_COMMAND"
 ```
 
 For the `pgarchivedata` "archive" database:
 
 ```bash
-docker compose exec postgres-archive psql -U postgres -d archive {SQL_COMMAND}
+docker compose exec postgres-archive psql -U postgres -d archive -c "SQL_COMMAND"
 ```
 
 For the `pgcachedata` "cache" database:
 
 ```bash
-docker compose exec postgres-cache psql -U postgres -d botcache {SQL_COMMAND}
+docker compose exec postgres-cache psql -U postgres -d botcache -c "SQL_COMMAND"
 ```
 
 ## Common Issues
