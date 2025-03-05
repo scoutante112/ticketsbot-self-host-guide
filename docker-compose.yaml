@@ -359,6 +359,8 @@ services:
         WS_URL: ${API_URL:-http://localhost:8082}
     ports:
       - '5000:5000'
+    networks:
+      - app-network
 
   logarchiver:
     image: ${LOGARCHIVER_IMAGE:-ghcr.io/ticketsbot/logarchiver:0cfab8ec82cfaa88af9e6fabe4dd9a407f7537dd}
