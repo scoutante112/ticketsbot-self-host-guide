@@ -11,6 +11,7 @@ services:
     volumes:
       - ./pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init-support-import.sql:/docker-entrypoint-initdb.d/init-support-import.sql
     networks:
       - app-network
     healthcheck:
@@ -156,6 +157,8 @@ services:
         restart: true
       postgres-cache:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       # sharder-main:
       #   condition: service_healthy
     networks:
@@ -217,6 +220,8 @@ services:
         condition: service_healthy
         restart: true
       postgres-cache:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - app-network
@@ -307,7 +312,7 @@ services:
       - app-network
   
   api:
-    image: ${API_IMAGE:-ghcr.io/ticketsbot/api:07943c2e1a9b8788d030b4b19db3e656513b6481}
+    image: ${API_IMAGE:-ghcr.io/ticketsbot-cloud/api:d4128ca2ee3601a87e2d45b02763d057dab4d414}
     restart: on-failure:10
     ports:
       - '8082:8081'
@@ -343,6 +348,11 @@ services:
       # PREMIUM_PROXY_KEY
       # SESSION_DB_THREADS
       # SESSION_SECRET
+      S3_IMPORT_ENDPOINT: ${S3_ENDPOINT}
+      S3_IMPORT_ACCESS_KEY: ${S3_ACCESS}
+      S3_IMPORT_SECRET_KEY: ${S3_SECRET}
+      S3_IMPORT_TRANSCRIPT_BUCKET: ${S3_TRANSCRIPT_IMPORT_BUCKET}
+      S3_IMPORT_DATA_BUCKET: ${S3_DATA_IMPORT_BUCKET}
     depends_on:
       postgres:
         condition: service_healthy
@@ -357,6 +367,7 @@ services:
         REDIRECT_URI: ${DASHBOARD_URL:-http://localhost:5000}/callback 
         API_URL: ${API_URL:-http://localhost:8082}
         WS_URL: ${API_URL:-http://localhost:8082}
+        CACHEBUST: "this is randeom" # (OPTIONAL) Change this whenever you update the dashboard repository
     ports:
       - '5000:5000'
     networks:
@@ -376,6 +387,11 @@ services:
       DATABASE_URI: postgres://postgres:${ARCHIVE_DATABASE_PASSWORD:-null}@${ARCHIVE_DATABASE_HOST:-postgres-archive:5432}/archive
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "4000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     depends_on:
       postgres-archive:
         condition: service_healthy
@@ -399,6 +415,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      postgres-cache:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   discord-chat-replica:
     image: ${DISCORD_CHAT_REPLICA_IMAGE:-ghcr.io/ticketsbot/discord-chat-replica:e7a42bfeb763b08d859f8a17430f5a38eb5d69a9}
@@ -407,6 +427,81 @@ services:
     networks:
       - app-network
 
+  import-sync-data:
+    image: ${IMPORT_SYNC_IMAGE:-ghcr.io/ticketsbot-cloud/import-sync:e5557bccf8771fc9bbe349e62487c28253027461} 
+    environment:
+      DAEMON_ENABLED: true
+      DAEMON_FREQUENCY: 1m
+      DAEMON_EXECUTION_TIMEOUT: '30m'
+      DAEMON_TYPE: "DATA"
+      
+      BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
+      REDIS_THREADS: 2
+
+      SENTRY_DSN: ${SENTRY_DSN}
+      DATABASE_URI: postgres://postgres:${DATABASE_PASSWORD:-null}@${DATABASE_HOST:-postgres:5432}/ticketsbot
+
+      S3_IMPORT_BUCKET: ${S3_DATA_IMPORT_BUCKET}
+      S3_ARCHIVE_BUCKET: ${S3_ARCHIVE_BUCKET}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_ACCESS_KEY: ${S3_ACCESS}
+      S3_SECRET_KEY: ${S3_SECRET}
+
+      V1_PUBLIC_KEY: "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA0As3ltZKpZLjS2kLVbEv4LCKNZKqNW1Pv6o6dtema94=\n-----END PUBLIC KEY-----"
+
+      LOG_ARCHIVER_URL: http://logarchiver:4000
+      LOG_ARCHIVER_KEY: ${ARCHIVER_AES_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      logarchiver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  import-sync-transcripts:
+    image: ${IMPORT_SYNC_IMAGE:-ghcr.io/ticketsbot-cloud/import-sync:e5557bccf8771fc9bbe349e62487c28253027461}
+    environment:
+      DAEMON_ENABLED: true
+      DAEMON_FREQUENCY: 2m
+      DAEMON_EXECUTION_TIMEOUT: '30m'
+      DAEMON_TYPE: "TRANSCRIPT"
+      
+      BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
+      REDIS_THREADS: 2
+
+      SENTRY_DSN: ${SENTRY_DSN}
+      DATABASE_URI: postgres://postgres:${DATABASE_PASSWORD:-null}@${DATABASE_HOST:-postgres:5432}/ticketsbot
+
+      S3_IMPORT_BUCKET: ${S3_TRANSCRIPT_IMPORT_BUCKET}
+      S3_ARCHIVE_BUCKET: ${S3_ARCHIVE_BUCKET}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_ACCESS_KEY: ${S3_ACCESS}
+      S3_SECRET_KEY: ${S3_SECRET}
+
+      V1_PUBLIC_KEY: "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA0As3ltZKpZLjS2kLVbEv4LCKNZKqNW1Pv6o6dtema94=\n-----END PUBLIC KEY-----"
+
+      LOG_ARCHIVER_URL: http://logarchiver:4000
+      LOG_ARCHIVER_KEY: ${ARCHIVER_AES_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      logarchiver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
 
 networks:
   app-network:

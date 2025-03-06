@@ -45,10 +45,10 @@ The image above was made using [Excalidraw](https://excalidraw.com/).
    - `ARCHIVER_ADMIN_AUTH_TOKEN`: your archiver admin auth token (e.g. `randomstring`)
    - `SENTRY_DSN`: your Sentry DSN (e.g. `https://examplePublicKey@o0.ingest.sentry.io/0`)
 
-4. Replace the placeholders in the following command and paste it at the bottom of `init-archive.sql`. There are 2 placeholders in the command, `${BUCKET_NAME}` and `${S3_ENDPOINT}`. Replace them with your bucket name and S3 endpoint respectively. You can also just edit the `init-archive.sql` file too, you just have to uncomment it (by removing the `--` at the start of the line) and replace variables there.
+4. Replace the placeholders in the following command and paste it at the bottom of `init-archive.sql`. There are 2 placeholders in the command, `${S3_ARCHIVE_BUCKET}` and `${S3_ENDPOINT}`. Replace them with your bucket name and S3 endpoint respectively. You can also just edit the `init-archive.sql` file too, you just have to uncomment it (by removing the `--` at the start of the line) and replace variables there.
 
    ```sql
-   INSERT INTO buckets (id, endpoint_url, name, active) VALUES ('b77cc1a0-91ec-4d64-bb6d-21717737ea3c', 'https://${S3_ENDPOINT}', '${BUCKET_NAME}', TRUE);
+   INSERT INTO buckets (id, endpoint_url, name, active) VALUES ('b77cc1a0-91ec-4d64-bb6d-21717737ea3c', 'https://${S3_ENDPOINT}', '${S3_ARCHIVE_BUCKET}', TRUE);
    ```
 
 5. Run `docker compose up -d` to pull the images and start the bot.
@@ -213,6 +213,14 @@ For the `pgcachedata` "cache" database:
 docker compose exec postgres-cache psql -U postgres -d botcache -c "SQL_COMMAND"
 ```
 
+### 10. How do I import data from ticketsbot.net?
+
+You first will need to have the exports from [export.ticketsbot.net](https://export.ticketsbot.net). Then you will need to open the self-hosted bot's dashboard and go to the import page and upload the exports.
+
+You must upload the data export first, wait for it to import, then after data is imported, you can upload the transcript export.
+
+The way the self hosted import works, you _*should** be able to import both data and transcripts at the same time, and it may work, but it is not recommended.
+
 ## Common Issues
 
 ### 1. There's an error. (`no active bucket`)
@@ -225,7 +233,7 @@ To fix this error you will either need to either:
 2. Run the following SQL command in the `pgarchivedata` database (and replace the placeholders with your bucket name and S3 endpoint):
 
    ```sql
-   INSERT INTO buckets (id, endpoint_url, name, active) VALUES ('b77cc1a0-91ec-4d64-bb6d-21717737ea3c', 'https://${S3_ENDPOINT}', '${BUCKET_NAME}', TRUE);
+   INSERT INTO buckets (id, endpoint_url, name, active) VALUES ('b77cc1a0-91ec-4d64-bb6d-21717737ea3c', 'https://${S3_ENDPOINT}', '${S3_ARCHIVE_BUCKET}', TRUE);
    ```
 
 ### 2. I got an error while setting the interactions url. (`The specified interactions endpoint url could not be verified.`)
@@ -264,3 +272,15 @@ This issue is caused by the bot not being able to find any servers that you own 
 ### 6. When I run a command, I get an error
 
 If you see the bot online and when running a command you get an error, it's likely you messed up the [Interactions Endpoint URL](https://discord.com/developers/docs/interactions/overview#configuring-an-interactions-endpoint-url), you can fix this by following the steps in the [Discord Bot Configuration](#discord-bot-configuration) section. Specifically step 3.
+
+### 7. ERROR: relation "import_logs" does not exist
+
+This error only occurs for users who have previously setup the bot before importing was supported.
+
+> :warning: Make sure you have the latest version of the bot before running the following command. As the `init-support-import.sql` file was added as a bind mount to `postgres` in the `docker-compose.yaml` file. Making the following command possible.
+
+To fix this error you will need to run the following command in the `postgres` container:
+
+```bash
+docker compose exec postgres psql -U postgres -d ticketsbot -f /docker-entrypoint-initdb.d/init-support-import.sql
+```

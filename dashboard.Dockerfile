@@ -9,8 +9,11 @@ RUN mkdir -p /tmp && chown -R node:node /tmp
 WORKDIR /tmp
 USER node
 
+# Bust cache (this will allow it to pull the latest version of the dashboard from the repo)
+ARG CACHEBUST=1
+
 # Clone the repository to /tmp
-RUN git clone https://github.com/TicketsBot/dashboard.git /tmp
+RUN git clone https://github.com/TicketsBot-cloud/dashboard.git /tmp
 
 # Switch directories to the frontend
 WORKDIR /tmp/frontend
