@@ -15,6 +15,10 @@ ARG CACHEBUST=1
 # Clone the repository to /tmp
 RUN git clone https://github.com/TicketsBot-cloud/dashboard.git /tmp
 
+# Switch to "known-working" commit.
+ARG COMMIT_HASH=cd5be3fc8619a7720c47d59d763efaabeafd61b2
+RUN git reset --hard $COMMIT_HASH
+
 # Switch directories to the frontend
 WORKDIR /tmp/frontend
 
