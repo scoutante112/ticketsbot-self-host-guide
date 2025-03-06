@@ -106,7 +106,7 @@ For common issues, please refer to the [Common Issues](./wiki/common-issues.md) 
 
 ## Migrations
 
-If you have previously setup the bot and want to update to the latest version, you will need to run the following based on when you set this up.
+If you have previously setup the bot and want to update to the latest version, you will need to run the following based on when you set this up. (Sorted newest first)
 
-- Before [PR#14](./wiki/common-issues.md#7-error-relation-import_logs-does-not-exist)
-- Before [PR#9](./wiki/common-issues.md#4-error-column-last_seen-of-relation-does-not-exist)
+- Before [Guide PR#14](https://github.com/DanPlayz0/ticketsbot-self-host-guide/pull/14), use [Common Issue #7](./wiki/common-issues.md#7-error-relation-import_logs-does-not-exist)
+- Before [Guide PR#9](https://github.com/DanPlayz0/ticketsbot-self-host-guide/pull/9), use [Common Issue #4](./wiki/common-issues.md#4-error-column-last_seen-of-relation-does-not-exist)
