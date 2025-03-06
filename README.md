@@ -62,7 +62,7 @@ As this bot is self-hosted, you will need to configure the bot yourself. Here ar
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
 2. Click on the application you created for the bot
 3. Set the `Interactions Endpoint URL` to `${HTTP_GATEWAY}/handle/${DISCORD_BOT_CLIENT_ID}`
-   - Replace `${HTTP_GATEWAY}` with the URL of your HTTP Gateway (e.g. `http://localhost:8080`, you must have a [publicly accessible URL](#6-i-want-anyone-to-be-able-to-use-the-dashboard-how-do-i-do-that) not localhost)
+   - Replace `${HTTP_GATEWAY}` with the URL of your HTTP Gateway (e.g. `http://localhost:8080`, you must have a [publicly accessible URL](./wiki/faq.md#6-i-want-anyone-to-be-able-to-use-the-dashboard-how-do-i-do-that) not localhost)
    - Replace `${DISCORD_BOT_CLIENT_ID}` with your bot's application/client ID (e.g. `508391840525975553`)
 4. Go to the OAuth2 tab
 5. Add the redirect URL `${DASHBOARD_URL}/callback` to the OAuth2 redirect URIs
@@ -76,211 +76,37 @@ As this bot is self-hosted, you will need to configure the bot yourself. Here ar
    - Global commands only: `docker run --rm ticketsbot/registercommands --token=your_bot_token --id=your_client_id`
    - Global & Admin commands by running `docker run --rm ticketsbot/registercommands --token=your_bot_token --id=your_client_id --admin-guild=your_admin_guild_id`
 
-## Registering the slash commands using GoLang
-
-1. Clone the [worker repository](https://github.com/TicketsBot/worker) (`git clone https://github.com/TicketsBot/worker.git`)
-2. Change directory to the `worker` folder (`cd worker`)
-3. Run `go run cmd/registercommands/main.go --token=your_bot_token --id=your_client_id`
-
-   - If you want to register the admin commands, add `--admin-guild=your_admin_guild_id` to the command
-
-4. If you get errors related to zlib (`undefined: Zstream`, `undefined: NewZstream`, `undefined: zNoFlush`, `undefined: zSyncFlush`, etc)
-   - You are missing the zlib package and [GDL](https://github.com/rxdn/gdl/) uses it.
-   - You can install it by running one of the following (depending on your package manager)
-     - Ubuntu: `apt-get install zlib1g-dev`
-     - CentOS: `yum install zlib-devel`
-
 ## Frequently Asked Questions
 
-### 1. What can I host this on?
+For frequently asked questions, please refer to the [FAQ](./wiki/faq.md) document.
 
-You should be able to host this on any* machine that can run Docker containers.
-
-> \* The docker images don't support ARM architecture out of the box, so not exactly "any" machine.
-
-### 2. What are the system requirements?
-
-I cannot recommend any specific requirements, but I can give you some information on the resources used by the bot (CPU metrics are out of 1200% as i was using a 6 core CPU with 12 logical processors):
-
-- Starting up the bot the peak was around 475.44MB of RAM and 43.21% CPU. (This was on a fresh start, it may vary)
-- After using the bot for a while, the bot was using around 1.5GB of RAM and 18% of a CPU.
-
-### 3. Can I turn off the logging?
-
-Kinda of, in certain containers there are environment variables, like the ones below which you can remove:
-
-```yaml
-RUST_BACKTRACE: 1
-RUST_LOG: trace
-```
-
-### 4. How do I update the bot?
-
-There are environment variables used in the `docker-compose.yaml` file that allows you to change which image the bot runs on. The current `docker-compose.yaml` file already using the latest available images of the bot's containers.
-
-You might be able to find a newer image for the respective repositories/packages on the [TicketsBot Packages](https://github.com/orgs/TicketsBot/packages) page but it's highly unlikely.
-
-If you instead look in the [TicketsBot v2 Packages](https://github.com/orgs/TicketsBot-cloud/packages) page and you'll probably find some newer images, this guide already uses one of them (aka `ghcr.io/ticketsbot-cloud/worker:v2.8.0`) as it supports the "branding" environment variables without asking you to recompile the bot yourself.
-
-If neither of those have newer images, you will have to fork the respective repositories, compile and update the `docker-compose.yaml` or `.env` to those compiled images.
-
-### 5. How do I get rid of the `ticketsbot.net` branding?
-
-This shouldn't be a problem now as this guide has been updated to use a newer image that already allows you to change the branding.
-
-Prior to [V2 PR#4](https://github.com/TicketsBot-cloud/worker/pull/4) and [Guide PR#8](https://github.com/DanPlayz0/ticketsbot-self-host-guide/pull/8), the only way to remove the original branding, required that you have knowledge of how to compile GoLang, Rust, and Svelte. Allowing you to change the branding in the bot's [source code](https://github.com/TicketsBot) and recompile the bot and update those image hashes in `docker-compose.yaml` or `.env` file and then re-run the bot.
-
-### 6. I want anyone to be able to use the dashboard, how do I do that?
-
-You have to setup a reverse proxy (examples being; [NginX](https://nginx.org/), [Caddy](https://caddyserver.com/), [Traefik](https://traefik.io/traefik/)) with the following routes:
-
-> :warning: I assume you are using the default ports from the compose file, if you are not, you will have to change the ports in the examples below.
-
-- `api.example.com` -> `http://localhost:8082` (api container)
-- `dashboard.example.com` -> `http://localhost:5000` (dashboard container)
-- `gateway.example.com` -> `http://localhost:8080` (http-gateway container)
-
-### 7. This requires S3, can I host this without S3? (NOT recommended)
-
-Yes you can but know this bot requires an S3 bucket to store transcripts. You can use [MinIO](https://min.io/) to create a local S3 bucket.
-
-If you really don't want to use S3, you will have to edit the `docker-compose.yaml` file.
-
-> :warning: This will cause the bot to break! As the bot requires the S3 bucket to store transcripts.
-
-Here are the steps to remove S3 and transcripts.
-
-1. Remove the `logarchiver` and `postgres-archive` services from the `docker-compose.yaml` file.
-2. In the `worker-interactions` service, remove the two environment variables that reference the archiver (aka `WORKER_ARCHIVER_URL` and `WORKER_ARCHIVER_AES_KEY`).
-3. In the `api` service, remove the two environment variables that reference the archiver (aka `LOG_ARCHIVER_URL` and `LOG_AES_KEY`).
-
-Once you've done that, you will also have to open the dashboard and disable "Store Ticket Transcripts" in the settings of every server the bot is setup in, otherwise you won't be able to close tickets.
-
-### 8. How do I activate premium features?
-
-The following steps will allow you to activate premium features on your self-hosted bot. In these steps, I will be using the UUID `a924e567-bc50-4bf9-bd8f-9fb6bf91f374` as an example.
-
-If you'd prefer to use a different UUID, you can generate one using [this website](https://www.uuidgenerator.net/version4). Just make sure to replace the UUID in each of the following steps.
-
-To activate premium features, you will need to [run the following SQL command](#9-how-do-i-run-the-sql-commands-inside-the-database-containers) in the `postgres` database:
-
-```sql
-INSERT INTO skus (id, label, type) VALUES ('a924e567-bc50-4bf9-bd8f-9fb6bf91f374', 'Premium Monthly', 'subscription');
-INSERT INTO subscription_skus (sku_id, tier, priority) VALUES ('a924e567-bc50-4bf9-bd8f-9fb6bf91f374', 'premium', 0);
-```
-
-Once you've run those SQL commands, you will need to generate a "giveaway key" using the following command (this requires you to [publish the admin commands](#registering-the-slash-commands-using-docker-recommended)):
-
-```text
-/admin genpremium sku:a924e567-bc50-4bf9-bd8f-9fb6bf91f374 length:99999
-```
-
-You will then receive a message in the bot's DMs with a "giveaway key". Copy that key and go to the server you want to activate premium on and run the following command:
-
-```text
-/premium
-```
-
-It will ask you to `Select which method you used to obtain premium` and then you need to select `Giveaway Key` and then paste the key you received in the bot's DMs into the modal that opens.
-
-Click `Submit` and you should have premium activated on that server for *__length__* (provided above, as 99999) days
-
-### 9. How do I run the sql commands inside the database containers?
-
-There are a few ways to run SQL commands inside a database.
-
-The first way is to use a GUI tool like [pgAdmin](https://www.pgadmin.org/) or [HeidiSQL](https://www.heidisql.com/). You can connect to the database using the credentials in the `.env` file and run the SQL commands. (Note: This requires you to uncomment the `ports` section in the `postgres` service in the `docker-compose.yaml` file)
-
-The second way is to use the `psql` command line tool. You can run the following command to execute the SQL commands, replacing `SQL_COMMAND` with the SQL command you want to run.
-
-If you prefer an interactive shell where you can paste multiple commands you can omit the `-c "SQL_COMMAND"` part.
-
-For the `postgres` "main" database:
-
-```bash
-docker compose exec postgres psql -U postgres -d ticketsbot -c "SQL_COMMAND"
-```
-
-For the `pgarchivedata` "archive" database:
-
-```bash
-docker compose exec postgres-archive psql -U postgres -d archive -c "SQL_COMMAND"
-```
-
-For the `pgcachedata` "cache" database:
-
-```bash
-docker compose exec postgres-cache psql -U postgres -d botcache -c "SQL_COMMAND"
-```
-
-### 10. How do I import data from ticketsbot.net?
-
-You first will need to have the exports from [export.ticketsbot.net](https://export.ticketsbot.net). Then you will need to open the self-hosted bot's dashboard and go to the import page and upload the exports.
-
-You must upload the data export first, wait for it to import, then after data is imported, you can upload the transcript export.
-
-The way the self hosted import works, you _*should** be able to import both data and transcripts at the same time, and it may work, but it is not recommended.
+- [What can I host this on?](./wiki/faq.md#1-what-can-i-host-this-on)
+- [What are the system requirements?](./wiki/faq.md#2-what-are-the-system-requirements)
+- [Can I turn off the logging?](./wiki/faq.md#3-can-i-turn-off-the-logging)
+- [How do I update the bot?](./wiki/faq.md#4-how-do-i-update-the-bot)
+- [How do I get rid of the `ticketsbot.net` branding?](./wiki/faq.md#5-how-do-i-get-rid-of-the-ticketsbotnet-branding)
+- [I want anyone to be able to use the dashboard, how do I do that?](./wiki/faq.md#6-i-want-anyone-to-be-able-to-use-the-dashboard-how-do-i-do-that)
+- [This requires S3, can I host this without S3? (NOT recommended)](./wiki/faq.md#7-this-requires-s3-can-i-host-this-without-s3-not-recommended)
+- [How do I activate premium features?](./wiki/faq.md#8-how-do-i-activate-premium-features)
+- [How do I run the sql commands inside the database containers?](./wiki/faq.md#9-how-do-i-run-the-sql-commands-inside-the-database-containers)
+- [How do I import data from ticketsbot.net?](./wiki/faq.md#10-how-do-i-import-data-from-ticketsbotnet)
 
 ## Common Issues
 
-### 1. There's an error. (`no active bucket`)
+For common issues, please refer to the [Common Issues](./wiki/common-issues.md) document.
 
-This error is caused by you skipping step #4 in the [Setup](#setup) section. You need to add the bucket to the database before starting the bot.
+- [There's an error. (`no active bucket`)](./wiki/common-issues.md#1-theres-an-error-no-active-bucket)
+- [I got an error while setting the interactions url. (`The specified interactions endpoint url could not be verified.`)](./wiki/common-issues.md#2-i-got-an-error-while-setting-the-interactions-url-the-specified-interactions-endpoint-url-could-not-be-verified)
+- [Invalid OAuth2 redirect_uri](./wiki/common-issues.md#3-invalid-oauth2-redirect_uri)
+- [ERROR: column "last_seen" of relation does not exist](./wiki/common-issues.md#4-error-column-last_seen-of-relation-does-not-exist)
+- [I can't login to the dashboard. Every time I try to login, it loops/redirects me back to the login page](./wiki/common-issues.md#5-i-cant-login-to-the-dashboard-every-time-i-try-to-login-it-loopsredirects-me-back-to-the-login-page)
+- [When I run a command, I get an error](./wiki/common-issues.md#6-when-i-run-a-command-i-get-an-error)
+- [ERROR: relation "import_logs" does not exist](./wiki/common-issues.md#7-error-relation-import_logs-does-not-exist)
+- [Failed to get import runs: An internal server error occurred](./wiki/common-issues.md#7-error-relation-import_logs-does-not-exist)
 
-To fix this error you will either need to either:
+## Migrations
 
-1. Delete the `pgarchivedata` folder and restart with an updated `init-archive.sql` file.
-2. Run the following SQL command in the `pgarchivedata` database (and replace the placeholders with your bucket name and S3 endpoint):
+If you have previously setup the bot and want to update to the latest version, you will need to run the following based on when you set this up.
 
-   ```sql
-   INSERT INTO buckets (id, endpoint_url, name, active) VALUES ('b77cc1a0-91ec-4d64-bb6d-21717737ea3c', 'https://${S3_ENDPOINT}', '${S3_ARCHIVE_BUCKET}', TRUE);
-   ```
-
-### 2. I got an error while setting the interactions url. (`The specified interactions endpoint url could not be verified.`)
-
-The most common error is that the URL you inputted is not publicly accessible (aka you tried `localhost` or [a private IP Address](https://en.wikipedia.org/wiki/Private_network)). 
-**You need to have a publicly accessible URL for the interactions endpoint.** Refer to [FAQ #6](#6-i-want-anyone-to-be-able-to-use-the-dashboard-how-do-i-do-that) for more information on a reverse proxy setup.
-
-### 3. Invalid OAuth2 redirect_uri
-
-> :warning: If you set up a [reverse proxy](#6-i-want-anyone-to-be-able-to-use-the-dashboard-how-do-i-do-that), you should use the dashboard domain (e.g. `https://dashboard.example.com`) you set instead of `http://localhost:5000`.
-
-This error is caused by you not setting the OAuth2 redirect URI in the [Discord Bot Configuration](#discord-bot-configuration) section. You need to set the redirect URI to `${DASHBOARD_URL}/callback`. Replace `${DASHBOARD_URL}` with the URL of your dashboard (e.g. `http://localhost:5000`).
-
-If have already started the bot once and you've changed the `DASHBOARD_URL` in the `.env` file, you will need to delete the `dashboard` image. The "easy way" is to turn off the bot and delete all the images which were pulled or built by the compose file, you can do this by running `docker compose down --rmi all`.
-
-The hard way is to find the image name, use `docker image ls` to view a list of images, and then use `docker image rm -f {image_name}`, replacing `{image_name}` with the image name.
-Assuming you cloned the repository into a folder named `ticketsbot-self-host-guide`, the image name would be `ticketsbot-self-host-guide_dashboard`.
-
-### 4. ERROR: column "last_seen" of relation does not exist
-
-This error was caused by the `init-cache.sql` file being incorrect which was fixed in [Guide PR#9](https://github.com/DanPlayz0/ticketsbot-self-host-guide/pull/9).
-
-If you had setup the bot before this PR was merged, you will need to run the following SQL command in the `postgres-cache` database:
-
-```sql
-ALTER TABLE users ADD COLUMN last_seen TIMESTAMPTZ;
-ALTER TABLE members ADD COLUMN last_seen TIMESTAMPTZ;
-```
-
-As this is just a cache database, you may also choose to stop the bot, delete the `pgcachedata` folder and re-run the bot with the updated `init-cache.sql` file.
-
-### 5. I can't login to the dashboard. Every time I try to login, it loops/redirects me back to the login page
-
-This issue is caused by the bot not being able to find any servers that you own or have admin for. You must first invite the bot into a server and run `/setup auto` in that server. Once you've done that, you should be able to login to the dashboard.
-
-### 6. When I run a command, I get an error
-
-If you see the bot online and when running a command you get an error, it's likely you messed up the [Interactions Endpoint URL](https://discord.com/developers/docs/interactions/overview#configuring-an-interactions-endpoint-url), you can fix this by following the steps in the [Discord Bot Configuration](#discord-bot-configuration) section. Specifically step 3.
-
-### 7. ERROR: relation "import_logs" does not exist
-
-This error only occurs for users who have previously setup the bot before importing was supported.
-
-> :warning: Make sure you have the latest version of the bot before running the following command. As the `init-support-import.sql` file was added as a bind mount to `postgres` in the `docker-compose.yaml` file. Making the following command possible.
-
-To fix this error you will need to run the following command in the `postgres` container:
-
-```bash
-docker compose exec postgres psql -U postgres -d ticketsbot -f /docker-entrypoint-initdb.d/init-support-import.sql
-```
+- Before [PR#14](./wiki/common-issues.md#7-error-relation-import_logs-does-not-exist)
+- Before [PR#9](./wiki/common-issues.md#4-error-column-last_seen-of-relation-does-not-exist)

@@ -95,3 +95,19 @@ This is guide is not complete. I recommend looking at the simple/original docume
    ```
 
 6. Download the `docker-compose.yaml`
+
+
+## Registering the slash commands using GoLang
+
+1. Clone the [worker repository](https://github.com/TicketsBot/worker) (`git clone https://github.com/TicketsBot/worker.git`)
+2. Download submodules (`git submodule update --init --recursive --remote`)
+3. Change directory to the `worker` folder (`cd worker`)
+4. Run `go run cmd/registercommands/main.go --token=your_bot_token --id=your_client_id`
+
+   - If you want to register the admin commands, add `--admin-guild=your_admin_guild_id` to the command
+
+5. If you get errors related to zlib (`undefined: Zstream`, `undefined: NewZstream`, `undefined: zNoFlush`, `undefined: zSyncFlush`, etc)
+   - You are missing the zlib package and [GDL](https://github.com/rxdn/gdl/) uses it.
+   - You can install it by running one of the following (depending on your package manager)
+     - Ubuntu: `apt-get install zlib1g-dev`
+     - CentOS: `yum install zlib-devel`
