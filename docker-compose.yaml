@@ -152,6 +152,13 @@ services:
       WORKER_STATSD_PREFIX: ticketsbot
 
       WORKER_SENTRY_DSN: ${SENTRY_DSN}
+
+      CLICKHOUSE_ADDR: clickhouse:9000
+      CLICKHOUSE_THREADS: 4
+      CLICKHOUSE_DATABASE: ticketsbot
+      CLICKHOUSE_USERNAME: default
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-null}
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -216,6 +223,13 @@ services:
       WORKER_STATSD_PREFIX: ticketsbot
 
       WORKER_SENTRY_DSN: ${SENTRY_DSN}
+
+      CLICKHOUSE_ADDR: clickhouse:9000
+      CLICKHOUSE_THREADS: 4
+      CLICKHOUSE_DATABASE: ticketsbot
+      CLICKHOUSE_USERNAME: default
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-null}
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -506,6 +520,37 @@ services:
         condition: service_healthy
     networks:
       - app-network
+
+  server-counter:
+    image: ${SERVER_COUNTER_IMAGE:-ghcr.io/ticketsbot-cloud/server-counter:33ef647b8ed2386e7946e1d1338ad070d5534abe}
+    environment:
+      server_addr: 0.0.0.0:4000
+      CACHE_URI: postgres://postgres:${CACHE_DATABASE_PASSWORD:-null}@postgres-cache/botcache
+    ports:
+      - '8087:80'
+    networks:
+      - app-network
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    environment:
+      CLICKHOUSE_DB: ticketsbot
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-null}
+    # ports: # Uncomment this line and the following line to access clickhouse on port 8123 and 9000:
+      #- "8123:8123"
+      #- "9000:9000"
+    volumes:
+      - ./clickhouse-data:/var/lib/clickhouse
+      - ./init-clickhouse.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 networks:
   app-network:
